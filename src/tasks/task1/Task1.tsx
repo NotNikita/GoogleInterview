@@ -1,8 +1,15 @@
 import {useState} from 'react';
+import {ListContainer} from './components/List';
+import {Button} from './components/Button';
+import {Wrapper} from './styles';
 
-export const Task1 = () => {
-  const [list1, setlist1] = useState<number[]>([1, 2, 3, 4]);
-  const [list2, setlist2] = useState<number[]>([]);
+interface Task1Props {
+  firstList: number[];
+  secondList: number[];
+}
+export const Task1 = ({firstList = [1, 2, 3, 4], secondList = []}: Task1Props) => {
+  const [list1, setlist1] = useState<number[]>(firstList);
+  const [list2, setlist2] = useState<number[]>(secondList);
   const [toMoveLeft, settoMoveLeft] = useState<number[]>([]);
   const [toMoveRight, settoMoveRight] = useState<number[]>([]);
 
@@ -10,69 +17,31 @@ export const Task1 = () => {
     setQueue((prev: number[]) => (prev.includes(num) ? prev.filter(p => p !== num) : [...prev, num]));
   }
 
+  function handleMoveRight() {
+    setlist1(list1.filter(el => !toMoveRight.includes(el)));
+    setlist2(list2.concat(toMoveRight));
+    settoMoveRight([]);
+  }
+
+  function handleMoveLeft() {
+    setlist2(list2.filter(el => !toMoveLeft.includes(el)));
+    setlist1(list1.concat(toMoveLeft));
+    settoMoveLeft([]);
+  }
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 20,
-        width: '300px',
-        height: '400px',
-      }}
-    >
-      <div style={{padding: '20px 0', border: '2px solid black', width: 70, alignSelf: 'center'}}>
-        {list1.map(el => (
-          <div key={`list1-${el}`}>
-            <input type='checkbox' onClick={() => handleClick(el, settoMoveLeft)} />
-            {el}
-          </div>
-        ))}
-      </div>
+    <>
+      <h1>Task 1</h1>
+      <Wrapper>
+        <ListContainer data-testid='left-list' list={list1} onClick={element => handleClick(element, settoMoveRight)} />
 
-      <div style={{display: 'flex', flexDirection: 'column', height: '100%', gap: 15, justifyContent: 'center'}}>
-        <button
-          style={{
-            width: 60,
-            height: 40,
-            background: 'peach',
-            border: '1px solid black',
-          }}
-          onClick={() => {
-            setlist1(list1.filter(el => !toMoveLeft.includes(el)));
-            setlist2(list2.concat(toMoveLeft));
-            settoMoveLeft([]);
-          }}
-        >{`>`}</button>
-        <button
-          style={{
-            width: 60,
-            height: 40,
-            background: 'peach',
-            border: '1px solid black',
-          }}
-          onClick={() => {
-            setlist2(list2.filter(el => !toMoveRight.includes(el)));
-            setlist1(list1.concat(toMoveRight));
-            settoMoveRight([]);
-          }}
-        >{`<`}</button>
-      </div>
+        <div>
+          <Button data-testid='btn-move-left' label={'<'} onClick={handleMoveLeft} />
+          <Button data-testid='btn-move-right' label={'>'} onClick={handleMoveRight} />
+        </div>
 
-      <div
-        style={{
-          padding: '20px 0',
-          border: '2px solid black',
-          width: 70,
-          alignSelf: 'center',
-        }}
-      >
-        {list2.map(el => (
-          <div key={`list2-${el}`}>
-            <input type='checkbox' onClick={() => handleClick(el, settoMoveRight)} />
-            {el}
-          </div>
-        ))}
-      </div>
-    </div>
+        <ListContainer data-testid='right-list' list={list2} onClick={element => handleClick(element, settoMoveLeft)} />
+      </Wrapper>
+    </>
   );
 };
