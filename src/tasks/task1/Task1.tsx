@@ -4,8 +4,8 @@ import {Button} from './components/Button';
 import {Wrapper} from './styles';
 
 interface Task1Props {
-  firstList: number[];
-  secondList: number[];
+  firstList?: number[];
+  secondList?: number[];
 }
 export const Task1 = ({firstList = [1, 2, 3, 4], secondList = []}: Task1Props) => {
   const [list1, setlist1] = useState<number[]>(firstList);
