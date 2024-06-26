@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {GridCell, Side, Task2Props, User} from './types';
+import {GridCell, Side, User} from './types';
 import {getEmptyGrid} from './utils';
 import {GridContainer, Cell} from './styles';
 
@@ -17,10 +17,11 @@ const WINNING_SCENARIOS = [
   [2, 4, 6],
 ];
 
-export const Task2 = (props: Task2Props) => {
+export const Task2 = () => {
   const [isFirstPlayer, setIsFirstPlayer] = useState(true);
   const [disabled, setDisabled] = useState(false);
-  const [players, setPlayers] = useState<User[]>([
+  const [winningScenario, setWinningScenario] = useState<number[]>([]);
+  const players: User[] = [
     {
       name: 'Player 1',
       side: Side.Nought,
@@ -29,7 +30,7 @@ export const Task2 = (props: Task2Props) => {
       name: 'Player 2',
       side: Side.Cross,
     },
-  ]);
+  ];
   const [grid, setGrid] = useState(getEmptyGrid());
 
   const checkIfGameFinished = (cells: GridCell[]): boolean => {
@@ -41,6 +42,7 @@ export const Task2 = (props: Task2Props) => {
         const elements = scenario.map(cellId => cells[cellId]);
         if (elements.every(element => element.status === side)) {
           isFinished = true;
+          setWinningScenario(scenario);
         }
       }
     }
@@ -77,17 +79,17 @@ export const Task2 = (props: Task2Props) => {
         <h2>🎉🎉Congratulations to {grid.winner.name} for Winning!🎉🎉🎉</h2>
       : <h2>Its turn of {players[isFirstPlayer ? 0 : 1].name}</h2>}
       <GridContainer>
-        {!grid.gameFinished &&
-          grid.cells.map(({cellId, status}: GridCell) => (
-            <Cell
-              key={cellId}
-              side={status}
-              onClick={() => {
-                if (status) return;
-                handleCellClick(cellId);
-              }}
-            />
-          ))}
+        {grid.cells.map(({cellId, status}: GridCell) => (
+          <Cell
+            key={cellId}
+            side={status}
+            onClick={() => {
+              if (status || disabled) return;
+              handleCellClick(cellId);
+            }}
+            highlight={winningScenario.includes(cellId)}
+          />
+        ))}
       </GridContainer>
     </>
   );

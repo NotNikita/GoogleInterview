@@ -1,12 +1,13 @@
 import styled, {css} from 'styled-components';
-import {switchProp} from 'styled-tools';
+import {ifProp, switchProp} from 'styled-tools';
 import {Side} from './types';
 
-export const Cell = styled.div<{side?: Side}>`
+export const Cell = styled.div<{side?: Side; highlight: boolean}>`
   width: 90px;
   height: 90px;
   border: 1px solid black;
   position: relative;
+  background-color: ${ifProp('highlight', '#E2F0D9', 'default')};
 
   ${switchProp('side', {
     [Side.Cross]: css`

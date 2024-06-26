@@ -21,7 +21,7 @@ const TASKS_MAP = new Map<number, JSX.Element>([
 ]);
 
 function App() {
-  const [displayedTask, setDisplayedTask] = useState(2);
+  const [displayedTask, setDisplayedTask] = useState(1);
 
   const changeTask = (page: number) => {
     setDisplayedTask(page);

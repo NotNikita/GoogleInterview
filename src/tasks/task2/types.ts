@@ -17,5 +17,3 @@ export interface Grid {
   gameFinished: boolean;
   winner: User | undefined;
 }
-
-export interface Task2Props {}
