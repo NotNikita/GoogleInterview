@@ -30,18 +30,15 @@ export const Task1 = ({firstList = [1, 2, 3, 4], secondList = []}: Task1Props) =
   }
 
   return (
-    <>
-      <h1>Task 1</h1>
-      <Wrapper>
-        <ListContainer data-testid='left-list' list={list1} onClick={element => handleClick(element, settoMoveRight)} />
+    <Wrapper>
+      <ListContainer data-testid='left-list' list={list1} onClick={element => handleClick(element, settoMoveRight)} />
 
-        <div>
-          <Button data-testid='btn-move-left' label={'<'} onClick={handleMoveLeft} />
-          <Button data-testid='btn-move-right' label={'>'} onClick={handleMoveRight} />
-        </div>
+      <div>
+        <Button data-testid='btn-move-left' label={'<'} onClick={handleMoveLeft} />
+        <Button data-testid='btn-move-right' label={'>'} onClick={handleMoveRight} />
+      </div>
 
-        <ListContainer data-testid='right-list' list={list2} onClick={element => handleClick(element, settoMoveLeft)} />
-      </Wrapper>
-    </>
+      <ListContainer data-testid='right-list' list={list2} onClick={element => handleClick(element, settoMoveLeft)} />
+    </Wrapper>
   );
 };
