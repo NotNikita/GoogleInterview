@@ -163,6 +163,24 @@ const mergeValuesOfKeys = (arr) => {
   return map
 }
 
+// Instead of sorting the list of values for each key after insertion, you could maintain an ordered insertion.
+const optimizedMergeValuesOfKeys = (arr) => {
+  const map = new Map();
+
+  for (const [key, value] of arr) {
+    if (!map.has(key)) {
+      map.set(key, [value]);
+    } else {
+      const values = map.get(key);
+      const index = values.findIndex(v => v > value); // Binary insertion
+      if (index === -1) values.push(value);
+      else values.splice(index, 0, value);
+    }
+  }
+
+  return Object.fromEntries(map);
+}
+
 // O(s)*O(1) + 2*O(s) ~ 3*O(s) ~ O(s)
 // array of strings
 const findAllPairs = (inputMap) => {
@@ -184,6 +202,24 @@ const findAllPairs = (inputMap) => {
   return result
 }
 
+/*
+Rather than generating all possible pairs, consider only generating pairs 
+in a sorted order from the start. If the list of keys is sorted, we 
+can avoid adding both (A, B) and (B, A), directly storing unique pairs.
+*/
+const optimizedFindAllPairs = (inputMap) => {
+  const keys = Object.keys(inputMap).sort(); // Sort to generate pairs in order
+  const keyPairs = [];
+
+  for (let i = 0; i < keys.length; i++) {
+    for (let j = i + 1; j < keys.length; j++) {
+      keyPairs.push([keys[i], keys[j]]);
+    }
+  }
+
+  return keyPairs;
+}
+
 // O((s*(s-1) / 2))
 const findPairs = (uniqueMap, pairs) => {
   const resultMap = {}
@@ -199,6 +235,29 @@ const findPairs = (uniqueMap, pairs) => {
   })
   
   return resultMap
+}
+
+/*
+Use a set-based approach to calculate intersections in O(m) 
+time rather than O(m * m), reducing time complexity. Convert
+one of the arrays to a Set and check membership for the 
+intersection with the second array.
+*/
+const optimizedFindPairs = (uniqueMap, pairs) => {
+    const resultMap = {};
+    for (const [first, second] of pairs) {
+      const arr1 = uniqueMap[first];
+      const arr2 = uniqueMap[second];
+  
+      const set1 = new Set(arr1);
+      const intersection = arr2.filter(course => set1.has(course));
+  
+      if (intersection.length > 0) {
+        resultMap[`${first},${second}`] = intersection;
+      }
+    }
+  
+    return resultMap;
 }
 
 // TOTAL: O(s) + O(n) + O((s*(s-1) / 2)) ~~~ O(n) + O(s) + O(s^2)
