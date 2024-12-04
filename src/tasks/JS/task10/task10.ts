@@ -2,7 +2,6 @@
 
 // Write a function that takes in a collection of (student ID number, course name) pairs and returns, for every pair of students, a collection of all courses they share.
 
-
 // Sample Input:
 
 // enrollments1 = [
@@ -25,7 +24,6 @@
 // Creating all possible pairs:
 // Sort and loop to push to result
 
-
 // Sample Output (pseudocode, in any order):
 
 // find_pairs(enrollments1) =>
@@ -37,8 +35,6 @@
 //   "17,94": []
 //   "17,25": []
 // }
-
-
 
 // Additional test cases:
 
@@ -55,8 +51,6 @@
 //   ["4", "Algorithms"]
 // ]
 
-
-
 // Sample output:
 
 // find_pairs(enrollments2) =>
@@ -71,16 +65,15 @@
 //   "4,1":[]
 //   "4,2":[]
 //   "4,3":[]
-// } 
+// }
 
 // Sample Input:
 // enrollments3 = [
-//   ["23", "Software Design"], 
-//   ["3", "Advanced Mechanics"], 
-//   ["2", "Art History"], 
+//   ["23", "Software Design"],
+//   ["3", "Advanced Mechanics"],
+//   ["2", "Art History"],
 //   ["33", "Another"],
 // ]
-
 
 // Sample output:
 
@@ -105,39 +98,39 @@
 // s: number of students
 // c: total number of courses being offered (note: The number of courses any student can take is bounded by a small constant)
 
-"use strict";
+'use strict';
 const _ = require('lodash');
 
 const enrollments1 = [
-  ["58", "Linear Algebra"],
-  ["94", "Art History"],
-  ["94", "Operating Systems"],
-  ["17", "Software Design"],
-  ["58", "Mechanics"],
-  ["58", "Economics"],
-  ["17", "Linear Algebra"],
-  ["17", "Political Science"],
-  ["94", "Economics"],
-  ["25", "Economics"],
-  ["58", "Software Design"]
+  ['58', 'Linear Algebra'],
+  ['94', 'Art History'],
+  ['94', 'Operating Systems'],
+  ['17', 'Software Design'],
+  ['58', 'Mechanics'],
+  ['58', 'Economics'],
+  ['17', 'Linear Algebra'],
+  ['17', 'Political Science'],
+  ['94', 'Economics'],
+  ['25', 'Economics'],
+  ['58', 'Software Design'],
 ];
 
 const enrollments2 = [
-  ["0", "Advanced Mechanics"],
-  ["0", "Art History"],
-  ["1", "Course 1"],
-  ["1", "Course 2"],
-  ["2", "Computer Architecture"],
-  ["3", "Course 1"],
-  ["3", "Course 2"],
-  ["4", "Algorithms"]
+  ['0', 'Advanced Mechanics'],
+  ['0', 'Art History'],
+  ['1', 'Course 1'],
+  ['1', 'Course 2'],
+  ['2', 'Computer Architecture'],
+  ['3', 'Course 1'],
+  ['3', 'Course 2'],
+  ['4', 'Algorithms'],
 ];
 
 const enrollments3 = [
-  ["23", "Software Design"], 
-  ["3",  "Advanced Mechanics"], 
-  ["2",  "Art History"], 
-  ["33", "Another"]
+  ['23', 'Software Design'],
+  ['3', 'Advanced Mechanics'],
+  ['2', 'Art History'],
+  ['33', 'Another'],
 ];
 
 // +
@@ -151,20 +144,20 @@ const enrollments3 = [
 // Sort and loop to push to result
 
 // Time: 2*O(n) ~ O(n)
-const mergeValuesOfKeys = (arr) => {
-  const map = {}
-  
+const mergeValuesOfKeys = arr => {
+  const map = {};
+
   arr.map(([key, value]) => {
-    map[key] = [...(map[key] || []), value]
-  })
+    map[key] = [...(map[key] || []), value];
+  });
   for (const [key, value] of Object.entries(map)) {
-    map[key] = value.sort()
+    map[key] = value.sort();
   }
-  return map
-}
+  return map;
+};
 
 // Instead of sorting the list of values for each key after insertion, you could maintain an ordered insertion.
-const optimizedMergeValuesOfKeys = (arr) => {
+const optimizedMergeValuesOfKeys = arr => {
   const map = new Map();
 
   for (const [key, value] of arr) {
@@ -179,35 +172,33 @@ const optimizedMergeValuesOfKeys = (arr) => {
   }
 
   return Object.fromEntries(map);
-}
+};
 
 // O(s)*O(1) + 2*O(s) ~ 3*O(s) ~ O(s)
 // array of strings
-const findAllPairs = (inputMap) => {
-  const keys = Object.keys(inputMap)
-  const keyPairs = []
-  
+const findAllPairs = inputMap => {
+  const keys = Object.keys(inputMap);
+  const keyPairs = [];
+
   keys.forEach((key, index) => {
-    const tempKeys = [...keys]
-    tempKeys.splice(index, 1)
-    const pairs = tempKeys.map(v => ([key, v]))
-    keyPairs.push(...pairs)
-  })
-  
+    const tempKeys = [...keys];
+    tempKeys.splice(index, 1);
+    const pairs = tempKeys.map(v => [key, v]);
+    keyPairs.push(...pairs);
+  });
+
   // remove duplicates
-  const set = new Set(
-    keyPairs.map(pair => pair.sort().join("-"))
-  )
-  const result = Array.from(set).map(v => v.split("-"))
-  return result
-}
+  const set = new Set(keyPairs.map(pair => pair.sort().join('-')));
+  const result = Array.from(set).map(v => v.split('-'));
+  return result;
+};
 
 /*
 Rather than generating all possible pairs, consider only generating pairs 
 in a sorted order from the start. If the list of keys is sorted, we 
 can avoid adding both (A, B) and (B, A), directly storing unique pairs.
 */
-const optimizedFindAllPairs = (inputMap) => {
+const optimizedFindAllPairs = inputMap => {
   const keys = Object.keys(inputMap).sort(); // Sort to generate pairs in order
   const keyPairs = [];
 
@@ -218,24 +209,23 @@ const optimizedFindAllPairs = (inputMap) => {
   }
 
   return keyPairs;
-}
+};
 
 // O((s*(s-1) / 2))
 const findPairs = (uniqueMap, pairs) => {
-  const resultMap = {}
-  
+  const resultMap = {};
+
   pairs.forEach(([first, second]) => {
-    const key = [first, second].join(",")
-    const arr1 = uniqueMap[first]
-    const arr2 = uniqueMap[second]
-    const intersection = _.intersection(arr1, arr2)
-    
-    
-    resultMap[key] = intersection
-  })
-  
-  return resultMap
-}
+    const key = [first, second].join(',');
+    const arr1 = uniqueMap[first];
+    const arr2 = uniqueMap[second];
+    const intersection = _.intersection(arr1, arr2);
+
+    resultMap[key] = intersection;
+  });
+
+  return resultMap;
+};
 
 /*
 Use a set-based approach to calculate intersections in O(m) 
@@ -244,30 +234,30 @@ one of the arrays to a Set and check membership for the
 intersection with the second array.
 */
 const optimizedFindPairs = (uniqueMap, pairs) => {
-    const resultMap = {};
-    for (const [first, second] of pairs) {
-      const arr1 = uniqueMap[first];
-      const arr2 = uniqueMap[second];
-  
-      const set1 = new Set(arr1);
-      const intersection = arr2.filter(course => set1.has(course));
-  
-      if (intersection.length > 0) {
-        resultMap[`${first},${second}`] = intersection;
-      }
+  const resultMap = {};
+  for (const [first, second] of pairs) {
+    const arr1 = uniqueMap[first];
+    const arr2 = uniqueMap[second];
+
+    const set1 = new Set(arr1);
+    const intersection = arr2.filter(course => set1.has(course));
+
+    if (intersection.length > 0) {
+      resultMap[`${first},${second}`] = intersection;
     }
-  
-    return resultMap;
-}
+  }
+
+  return resultMap;
+};
 
 // TOTAL: O(s) + O(n) + O((s*(s-1) / 2)) ~~~ O(n) + O(s) + O(s^2)
 // Space: ???
 
-const part1 = mergeValuesOfKeys(enrollments3)
+const part1 = mergeValuesOfKeys(enrollments3);
 // console.log(part1)
 
-const part2 = findAllPairs(part1)
+const part2 = findAllPairs(part1);
 // console.log(part2)
 
-const part3 = findPairs(part1, part2)
-console.log(part3)
+const part3 = findPairs(part1, part2);
+console.log(part3);
