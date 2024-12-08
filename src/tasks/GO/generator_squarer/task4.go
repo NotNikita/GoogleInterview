@@ -40,6 +40,7 @@ func squarer(ctx context.Context, in <-chan int) <-chan int {
 	out := make(chan int, 5)
 
 	go func() {
+		defer close(out)
 	LOOP:
 		for {
 			select {
@@ -47,7 +48,7 @@ func squarer(ctx context.Context, in <-chan int) <-chan int {
 				break LOOP
 			case v, ok := <-in:
 				if !ok {
-					close(out)
+
 					break LOOP
 				}
 				out <- v * v
