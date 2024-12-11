@@ -37,7 +37,7 @@ func orDone(ctx context.Context, in <-chan interface{}) <-chan interface{} {
 }
 
 func main() {
-	mainContext, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	mainContext, _ := context.WithTimeout(context.Background(), 20*time.Millisecond)
 	ch := make(chan interface{})
 
 	go func() {
@@ -52,6 +52,7 @@ func main() {
 		res = append(res, v)
 	}
 	if !reflect.DeepEqual(res, []interface{}{0, 1, 2}) {
+		fmt.Print("Result before panic", res)
 		panic("wrong code")
 	} else {
 		fmt.Println("Program worker correctly")
