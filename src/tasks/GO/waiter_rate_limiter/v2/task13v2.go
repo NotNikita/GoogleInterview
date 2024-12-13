@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"runtime/pprof"
 	"sync"
 	"time"
 )
@@ -99,6 +101,18 @@ func NewGroupWait(maxParallel int) waiter {
 }
 
 func main() {
+	// Start CPU profiling
+	cpuProfile, err := os.Create("cpu.prof")
+	if err != nil {
+		fmt.Println("Could not create CPU profile:", err)
+		return
+	}
+	defer cpuProfile.Close()
+	if err := pprof.StartCPUProfile(cpuProfile); err != nil {
+		fmt.Println("Could not start CPU profile:", err)
+		return
+	}
+	defer pprof.StopCPUProfile()
 	start := time.Now()
 
 	ctx := context.Background()
@@ -117,12 +131,12 @@ func main() {
 		return expErr1
 	})
 
-	err := g.wait()
-	if !errors.Is(err, expErr1) || !errors.Is(err, expErr2) {
-		fmt.Println("IF: Our errors:", err)
+	someErr := g.wait()
+	if !errors.Is(someErr, expErr1) || !errors.Is(someErr, expErr2) {
+		fmt.Println("IF: Our errors:", someErr)
 		panic("wrong code")
 	} else {
-		fmt.Println("ELSE: Our errors:", err)
+		fmt.Println("ELSE: Our errors:", someErr)
 	}
 
 	elapsed := time.Since(start)
