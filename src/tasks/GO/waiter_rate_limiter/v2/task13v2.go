@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 )
 
 const (
@@ -16,66 +17,90 @@ type waiter interface {
 	run(ctx context.Context, f func(ctx context.Context) error)
 }
 
+// v2: Worker Pool
 // "waitGroup" should implement "waiter" interface
 type waitGroup struct {
 	// code here
-	workerWg sync.WaitGroup
-	mu       sync.Mutex
+	mu        sync.Mutex
+	workersWg sync.WaitGroup
+	tasksWg   sync.WaitGroup
 
-	workers chan struct{}
-	errors  []error
+	taskQueue chan task
+	errors    []error
+}
+
+type task struct {
+	ctx context.Context
+	fn  func(context.Context) error
 }
 
 // Should return an error, if one of "run" functions finished with error
 // If there multiple instances of such errors, return "errors.Join"
 func (g *waitGroup) wait() error {
 	// code here
-	var err error
+	g.tasksWg.Wait()
+	close(g.taskQueue)
+	g.workersWg.Wait()
 
-	g.workerWg.Wait()
-	close(g.workers)
+	var outErr error
+
 	for _, er := range g.errors {
-		if er != nil {
-			err = errors.Join(err, er)
-		}
+		outErr = errors.Join(outErr, er)
 	}
 
-	return err
+	return outErr
 }
 
+// v2: Add task to task queue
 // Should concurrently run functions inside "run", passed via "f"
 func (g *waitGroup) run(ctx context.Context, fn func(ctx context.Context) error) {
 	// code here
-	g.workers <- struct{}{}
-	g.workerWg.Add(1)
 
-	go func() {
-		defer func() {
-			<-g.workers
-			g.workerWg.Done()
-		}()
+	g.tasksWg.Add(1)
+	g.taskQueue <- task{
+		ctx: ctx,
+		fn:  fn,
+	}
 
-		if maybeErr := fn(ctx); maybeErr != nil {
-			g.mu.Lock()
-			g.errors = append(g.errors, maybeErr)
-			g.mu.Unlock()
-		}
-	}()
 }
 
+func worker(theWaitGroup *waitGroup) {
+	defer theWaitGroup.workersWg.Done()
+
+	for task := range theWaitGroup.taskQueue {
+		if maybeError := task.fn(task.ctx); maybeError != nil {
+			theWaitGroup.mu.Lock()
+			theWaitGroup.errors = append(theWaitGroup.errors, maybeError)
+			theWaitGroup.mu.Unlock()
+		}
+		theWaitGroup.tasksWg.Done()
+	}
+}
+
+// v2: create Worker pool with "maxParallel" workers
 // Struct constructor
 // Should create create N instances of "waitGroup", where N is <= maxParallel
 func NewGroupWait(maxParallel int) waiter {
 	// code here
-	return &waitGroup{
-		workerWg: sync.WaitGroup{},
-		mu:       sync.Mutex{},
-		workers:  make(chan struct{}, maxParallel),
-		errors:   []error{},
+	theWaitGroup := &waitGroup{
+		mu:        sync.Mutex{},
+		workersWg: sync.WaitGroup{},
+		tasksWg:   sync.WaitGroup{},
+		taskQueue: make(chan task),
+		errors:    []error{},
 	}
+
+	theWaitGroup.workersWg.Add(maxParallel)
+	for i := 0; i < maxParallel; i++ {
+		go worker(theWaitGroup)
+	}
+
+	return theWaitGroup
 }
 
 func main() {
+	start := time.Now()
+
 	ctx := context.Background()
 
 	g := NewGroupWait(MAX_PARALLEL_FUNCS)
@@ -99,4 +124,7 @@ func main() {
 	} else {
 		fmt.Println("ELSE: Our errors:", err)
 	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("Execution time: %s\n", elapsed) // 1,95s -> 3,6s
 }
